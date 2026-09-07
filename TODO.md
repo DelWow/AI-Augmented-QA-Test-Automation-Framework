@@ -2,7 +2,7 @@
 
 - [x] Step 1: scaffold repo structure, gitignore, env template, TODO list
 - [x] Step 2: add minimal TaskTracker REST API
-- [ ] Step 3: add minimal frontend for TaskTracker
+- [x] Step 3: add minimal frontend for TaskTracker
 - [ ] Step 4: add OpenAPI spec for TaskTracker API
 - [ ] Step 5: add baseline hand-written Postman collection
 - [ ] Step 6: add AI-generated Postman edge-case test script

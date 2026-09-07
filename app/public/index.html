@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TaskTracker</title><link rel="stylesheet" href="style.css"><script src="app.js" defer></script></head>
+<body><main><h1>TaskTracker</h1><p>A small space for your next task.</p>
+<p id="error" role="alert"></p>
+<section id="login-page"><h2>Log in</h2><p>Demo: any username and password <code>demo-password</code>.</p>
+<form id="login-form"><label for="username">Username</label><input id="username" autocomplete="username" maxlength="80" required>
+<label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required>
+<button id="login-button" type="submit">Log in</button></form></section>
+<section id="tasks-page" hidden><h2>Your tasks</h2><button id="logout-button">Log out</button>
+<form id="task-form"><label for="task-title">Task title</label><input id="task-title" maxlength="200" required><button id="create-task" type="submit" data-testid="create-task">Add task</button></form>
+<ul id="task-list"></ul><p id="empty-state">No tasks yet.</p></section>
+</main></body></html>
