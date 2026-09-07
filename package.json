@@ -1,0 +1,1 @@
+{"name":"ai-augmented-qa","version":"1.0.0","private":true,"engines":{"node":">=22"},"scripts":{"start":"node --env-file-if-exists=.env app/server.js","test":"node --test qa/unit/*.test.js"},"dependencies":{"express":"^5.2.1"}}
