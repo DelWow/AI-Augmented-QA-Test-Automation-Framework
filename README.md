@@ -25,4 +25,24 @@ The cases and assertion scripts were AI-authored from the API contract and imple
 node qa/postman/generate-edge-cases.js
 ```
 
-This script serializes the reviewed cases; it does not call a model or generate new suggestions at runtime. Newman project integration is planned for step 7.
+This script serializes the reviewed cases; it does not call a model or generate new suggestions at runtime.
+
+## Run Postman collections with Newman
+
+After `npm ci`, run:
+
+```sh
+npm run test:api
+```
+
+This starts an isolated TaskTracker server on an available localhost port, runs the baseline and AI edge-case collections sequentially, and closes the server afterward. No separate `npm start` or API key is needed. Both collections run even if one fails; assertion, script, and request failures produce a nonzero exit code. Requests time out after 10 seconds, scripts after 5 seconds, and each collection after 2 minutes.
+
+To test an already running server, export `BASE_URL` for the command:
+
+```sh
+BASE_URL=http://127.0.0.1:3000 npm run test:api
+```
+
+The runner reads `BASE_URL` from the process environment, not from `.env`. When set, it uses that server without starting or stopping it. Collections create unique demo users and delete their tasks on successful runs; interrupted runs may leave data in the target server.
+
+Console results and JUnit XML reports are produced for each collection at `qa/reports/postman/baseline.xml` and `qa/reports/postman/ai-edge-cases.xml`. Reports are overwritten on subsequent runs and ignored by Git. Use `npm test` for unit checks, or `npm run test:all` to run unit checks followed by both full collections.

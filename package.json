@@ -1,1 +1,20 @@
-{"name":"ai-augmented-qa","version":"1.0.0","private":true,"engines":{"node":">=22"},"scripts":{"start":"node --env-file-if-exists=.env app/server.js","test":"node --test qa/unit/*.test.js"},"dependencies":{"express":"^5.2.1"}}
+{
+  "name": "ai-augmented-qa",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env app/server.js",
+    "test": "node --test qa/unit/*.test.js",
+    "test:api": "node qa/postman/run-collections.js",
+    "test:all": "npm test && npm run test:api"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "newman": "^6.2.2"
+  }
+}
