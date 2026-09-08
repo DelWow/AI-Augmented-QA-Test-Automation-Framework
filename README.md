@@ -12,3 +12,17 @@ TaskTracker is a small application used to demonstrate API, browser, cross-brows
 The 13 requests check missing authentication, invalid credentials, login, an empty initial list, missing-title validation, and task creation, reading, listing, updating, and deletion. Assertions check status codes and response bodies, including persisted updates and a 404 after deletion.
 
 Each iteration creates a unique demo username and uses `demo-password`. The token and task ID are captured automatically in run-local variables. Successful runs delete their task; an interrupted run may leave a task in memory. Restarting the server clears all tasks and sessions. Avoid environment or data-file variables named `baseUrl` unless intentionally overriding the collection URL.
+
+## AI-generated Postman edge cases
+
+Import `qa/postman/ai-edge-cases.postman_collection.json` and run the whole collection in order using the same server and `baseUrl` setup above. It runs independently of the baseline collection and requires no API key or Postman environment.
+
+The cases cover username/title boundaries (including UTF-16 length), whitespace, invalid types and fields, duplicate titles, completion updates, invalid IDs, JSON parsing and body limits, and ownership isolation. They also check that rejected writes preserve data and that successful runs clean up their tasks.
+
+The cases and assertion scripts were AI-authored from the API contract and implementation. The [generation brief](qa/postman/edge-cases.prompt.md) records their scope and provenance. To rebuild the checked-in collection offline after editing the cases, run:
+
+```sh
+node qa/postman/generate-edge-cases.js
+```
+
+This script serializes the reviewed cases; it does not call a model or generate new suggestions at runtime. Newman project integration is planned for step 7.
