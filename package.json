@@ -9,16 +9,23 @@
     "start": "node --env-file-if-exists=.env app/server.js",
     "test": "node --test qa/unit/*.test.js",
     "test:api": "node qa/postman/run-collections.js",
-    "test:all": "npm test && npm run test:api && npm run test:e2e",
+    "test:all": "npm test && npm run test:api && npm run test:e2e && npm run test:selenium && npm run test:visual",
     "test:e2e": "node qa/cypress/run-e2e.js",
-    "test:e2e:open": "node qa/cypress/run-e2e.js --open"
+    "test:e2e:open": "node qa/cypress/run-e2e.js --open",
+    "test:selenium": "node qa/selenium/run-smoke.js",
+    "test:visual": "node qa/visual/run-visual.js",
+    "visual:update": "node qa/visual/run-visual.js --update",
+    "visual:review": "node --env-file-if-exists=.env qa/visual/review-diffs.js"
   },
   "dependencies": {
     "express": "^5.2.1"
   },
   "devDependencies": {
     "cypress": "^16.0.0",
-    "newman": "^6.2.2"
+    "newman": "^6.2.2",
+    "pixelmatch": "^7.2.0",
+    "pngjs": "^7.0.0",
+    "selenium-webdriver": "^4.48.0"
   },
   "allowScripts": {
     "cypress@16.0.0": true

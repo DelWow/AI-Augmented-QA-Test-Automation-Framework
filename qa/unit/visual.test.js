@@ -1,0 +1,32 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const { mkdtemp, writeFile, readFile, rm, access } = require('node:fs/promises');
+const path = require('node:path');
+const { tmpdir } = require('node:os');
+const { PNG } = require('pngjs');
+const { compareScreenshot } = require('../visual/compare');
+
+test('visual comparison detects changes and dimensions without approving missing baselines', async t => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'visual-compare-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const baseline = path.join(dir, 'baseline.png');
+  const current = path.join(dir, 'current.png');
+  const diff = path.join(dir, 'diff.png');
+  const png = new PNG({ width: 4, height: 4 });
+  png.data.fill(255);
+  await writeFile(current, PNG.sync.write(png));
+  assert.equal((await compareScreenshot(baseline, current, diff)).status, 'failed');
+  await assert.rejects(access(baseline), { code: 'ENOENT' });
+  const original = PNG.sync.write(png);
+  await writeFile(baseline, original);
+  assert.equal((await compareScreenshot(baseline, current, diff)).status, 'passed');
+  png.data[0] = png.data[1] = png.data[2] = 0;
+  await writeFile(current, PNG.sync.write(png));
+  const changed = await compareScreenshot(baseline, current, diff);
+  assert.equal(changed.status, 'failed');
+  assert.ok(changed.changedPixels > 0);
+  assert.equal(PNG.sync.read(await readFile(diff)).width, 4);
+  assert.deepEqual(await readFile(baseline), original);
+  await writeFile(current, PNG.sync.write(new PNG({ width: 2, height: 2 })));
+  assert.equal((await compareScreenshot(baseline, current, diff)).reason, 'Image dimensions differ');
+});
