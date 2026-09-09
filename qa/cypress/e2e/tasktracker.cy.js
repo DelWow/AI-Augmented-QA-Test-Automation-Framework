@@ -5,7 +5,7 @@ describe('TaskTracker baseline browser workflows', () => {
   function login(password = 'demo-password') {
     cy.get('#username').clear().type(username);
     cy.get('#password').clear().type(password, { log: false });
-    cy.get('#login-button').click();
+    cy.byIntent('login').click();
     cy.wait('@login').then(({ response }) => {
       if (response.statusCode === 200) token = response.body.token;
     });
@@ -52,7 +52,7 @@ describe('TaskTracker baseline browser workflows', () => {
     login();
     cy.wait('@list');
     cy.get('#task-title').type('Baseline browser task');
-    cy.get('[data-testid="create-task"]').click();
+    cy.byIntent('createTask').click();
     cy.wait('@create').its('response.statusCode').should('eq', 201);
     cy.wait('@list');
     cy.get('#task-title').should('have.value', '');
@@ -84,7 +84,7 @@ describe('TaskTracker baseline browser workflows', () => {
   it('logs out and stays logged out after reload', () => {
     login();
     cy.wait('@list');
-    cy.get('#logout-button').click();
+    cy.byIntent('logout').click();
     cy.get('#login-page').should('be.visible');
     cy.get('#tasks-page').should('not.be.visible');
     cy.window().should(win => expect(win.sessionStorage.getItem('token')).to.equal(null));
@@ -97,12 +97,12 @@ describe('TaskTracker baseline browser workflows', () => {
     login();
     cy.wait('@list');
     cy.get('#task-title').type('   ');
-    cy.get('[data-testid="create-task"]').click();
+    cy.byIntent('createTask').click();
     cy.wait('@create').its('response.statusCode').should('eq', 400);
     cy.get('[role="alert"]').should('contain.text', 'Title must contain');
     cy.get('#task-list').children().should('have.length', 0);
     cy.get('#task-title').clear().type('Corrected title');
-    cy.get('[data-testid="create-task"]').click();
+    cy.byIntent('createTask').click();
     cy.wait('@create').its('response.statusCode').should('eq', 201);
     cy.wait('@list');
     cy.get('[role="alert"]').should('be.empty');

@@ -6,7 +6,7 @@ describe('TaskTracker AI-suggested browser cases', () => {
   function login(user = 'owner') {
     cy.get('#username').clear().type(`ai-${user}-${runId}`);
     cy.get('#password').clear().type('demo-password', { log: false });
-    cy.get('#login-button').click();
+    cy.byIntent('login').click();
     cy.wait('@login').then(({ response }) => {
       expect(response.statusCode).to.equal(200);
       sessions.push(response.body.token);
@@ -17,7 +17,7 @@ describe('TaskTracker AI-suggested browser cases', () => {
 
   function createTask(title) {
     cy.get('#task-title').clear().type(title, { parseSpecialCharSequences: false });
-    cy.get('[data-testid="create-task"]').click();
+    cy.byIntent('createTask').click();
     return cy.wait('@create').then(({ response }) => {
       expect(response.statusCode).to.equal(201);
       const id = response.body.id;
@@ -52,14 +52,14 @@ describe('TaskTracker AI-suggested browser cases', () => {
   it('AI-01: keeps task lists isolated when switching accounts', () => {
     login();
     createTask('Owner private task');
-    cy.get('#logout-button').click();
+    cy.byIntent('logout').click();
     cy.get('#task-list').children().should('have.length', 0);
     login('other');
     cy.get('#empty-state').should('be.visible');
     cy.get('#task-list').should('not.contain.text', 'Owner private task');
     createTask('Other private task');
     cy.get('#task-list li').should('have.length', 1).and('contain.text', 'Other private task');
-    cy.get('#logout-button').click();
+    cy.byIntent('logout').click();
     login();
     cy.get('#task-list li').should('have.length', 1).and('contain.text', 'Owner private task');
     cy.get('#task-list').should('not.contain.text', 'Other private task');
@@ -105,13 +105,13 @@ describe('TaskTracker AI-suggested browser cases', () => {
       statusCode: 503, body: { error: 'Temporarily unavailable' }
     }).as('failedCreate');
     cy.get('#task-title').type('Retry this task');
-    cy.get('[data-testid="create-task"]').click();
+    cy.byIntent('createTask').click();
     cy.wait('@failedCreate').its('response.statusCode').should('eq', 503);
     cy.get('[role="alert"]').should('have.text', 'Temporarily unavailable');
     cy.get('#task-title').should('have.value', 'Retry this task');
     cy.get('#task-list').children().should('have.length', 0);
     cy.get('#empty-state').should('be.visible');
-    cy.get('[data-testid="create-task"]').click();
+    cy.byIntent('createTask').click();
     cy.wait('@create').its('response.statusCode').should('eq', 201);
     cy.wait('@list');
     cy.get('[role="alert"]').should('be.empty');

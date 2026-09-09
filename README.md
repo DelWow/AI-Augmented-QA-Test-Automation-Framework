@@ -49,7 +49,7 @@ Console results and JUnit XML reports are produced for each collection at `qa/re
 
 ## Baseline browser tests with Cypress
 
-After `npm ci`, run `npm run test:e2e`. The runner starts an isolated TaskTracker server on an available localhost port, runs the four baseline tests and five AI-suggested cases in headless Electron, and shuts down the server. Cypress downloads its browser binary during installation; if install scripts were disabled, run `npx cypress install` first.
+After `npm ci`, run `npm run test:e2e`. The runner starts an isolated TaskTracker server on an available localhost port, runs the baseline, AI-suggested, and selector-recovery specs in headless Electron, and shuts down the server. Cypress downloads its browser binary during installation; if install scripts were disabled, run `npx cypress install` first.
 
 The tests cover login failure and recovery, task creation/completion/reopening/deletion with reload persistence, logout persistence, and title validation with recovery. They exercise the real frontend and API, wait for network responses instead of fixed delays, and use a unique user per test. An after-test cleanup removes that user's tasks, including when a UI assertion fails; interrupted runs may still leave data on an external server.
 
@@ -62,3 +62,9 @@ If a terminal inherited `ELECTRON_RUN_AS_NODE` from an Electron-based editor and
 ## AI-suggested browser coverage
 
 The [ranked suggestions and generation brief](qa/cypress/test-suggestions.md) document eight AI-authored proposals and why five were selected. Their implementation is in `qa/cypress/e2e/ai-suggestions.cy.js`: account isolation, literal HTML-like titles, invalid-session recovery, retrying a rejected save, and independent actions on duplicate titles. They run automatically with the baseline and require no AI credentials. Only the single failed-save response is stubbed; the remaining requests use the real API.
+
+## AI-assisted selector recovery
+
+The login, add-task, and logout lookups use `cy.byIntent(...)`. If a primary selector disappears, an AI-authored rule can recover a unique visible button with the expected scope, type, and exact text. Ambiguous or incorrect matches fail, and normal click/actionability checks still apply. This uses reviewed offline rules, with no runtime AI call.
+
+Recovery details appear in the Cypress Command Log and `qa/reports/cypress/selector-recovery.jsonl`. Six verification tests cover intentional selector changes and rejection conditions. See the [rules, generation brief, and strict-mode usage](qa/cypress/selector-recovery.md) for maintenance guidance.
