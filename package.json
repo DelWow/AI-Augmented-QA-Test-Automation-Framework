@@ -9,13 +9,15 @@
     "start": "node --env-file-if-exists=.env app/server.js",
     "test": "node --test qa/unit/*.test.js",
     "test:api": "node qa/postman/run-collections.js",
-    "test:all": "npm test && npm run test:api && npm run test:e2e && npm run test:selenium && npm run test:visual",
+    "test:all": "node qa/run-all.js",
     "test:e2e": "node qa/cypress/run-e2e.js",
     "test:e2e:open": "node qa/cypress/run-e2e.js --open",
     "test:selenium": "node qa/selenium/run-smoke.js",
     "test:visual": "node qa/visual/run-visual.js",
     "visual:update": "node qa/visual/run-visual.js --update",
-    "visual:review": "node --env-file-if-exists=.env qa/visual/review-diffs.js"
+    "visual:review": "node --env-file-if-exists=.env qa/visual/review-diffs.js",
+    "test:suite": "node qa/run-suite.js",
+    "bugs:review": "node --env-file-if-exists=.env qa/bugs/report.js"
   },
   "dependencies": {
     "express": "^5.2.1"

@@ -103,3 +103,9 @@ CI uses the [macOS 15 ARM64 runner](https://github.com/actions/runner-images#ava
 Every run attempts to upload `qa-evidence-<run-id>-<attempt>` with suite logs, reports, failure screenshots, current visual images, baselines, and diffs, retained for 14 days. The workflow has read-only repository permissions, no AI secrets, a 30-minute timeout, and cancels older runs for the same ref. Actions are pinned to commit SHAs; npm downloads are cached by the lockfile. CI never updates baselines, commits changes, or requests online AI review.
 
 After you push the workflow, inspect its first hosted run in the repository's Actions tab. Local validation cannot establish the hosted runner's pixel equivalence; any initial difference requires image review. For an intentional browser-baseline update, see the [visual review workflow](qa/visual/README.md).
+
+## Failure bug-report drafts
+
+`npm run test:all` and the CI test steps automatically capture suite results and generate offline bug drafts for failures under `qa/reports/bugs/`. The full-suite command runs every suite and still exits nonzero when any suite fails. To run one suite with reporting, use `npm run test:suite -- unit|postman|cypress|selenium|visual` (choose one name).
+
+Drafts contain the reproduction command, observed failure, environment, and redacted log evidence. Passing reruns clear that suite's stale draft. Optional `AI_MODE=online npm run bugs:review -- <suite>` reads `.env` credentials and requests advisory AI triage from the latest captured failure. Automatic runs stay offline, and nothing is published to GitHub Issues. See the [failure-report workflow and limitations](qa/bugs/README.md).
