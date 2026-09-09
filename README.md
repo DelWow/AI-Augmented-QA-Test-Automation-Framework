@@ -49,7 +49,7 @@ Console results and JUnit XML reports are produced for each collection at `qa/re
 
 ## Baseline browser tests with Cypress
 
-After `npm ci`, run `npm run test:e2e`. The runner starts an isolated TaskTracker server on an available localhost port, runs the four baseline tests in headless Electron, and shuts down the server. Cypress downloads its browser binary during installation; if install scripts were disabled, run `npx cypress install` first.
+After `npm ci`, run `npm run test:e2e`. The runner starts an isolated TaskTracker server on an available localhost port, runs the four baseline tests and five AI-suggested cases in headless Electron, and shuts down the server. Cypress downloads its browser binary during installation; if install scripts were disabled, run `npx cypress install` first.
 
 The tests cover login failure and recovery, task creation/completion/reopening/deletion with reload persistence, logout persistence, and title validation with recovery. They exercise the real frontend and API, wait for network responses instead of fixed delays, and use a unique user per test. An after-test cleanup removes that user's tasks, including when a UI assertion fails; interrupted runs may still leave data on an external server.
 
@@ -58,3 +58,7 @@ Use `npm run test:e2e:open` for the interactive Cypress runner and close it when
 Results appear in the terminal. Failed headless tests save screenshots under `qa/reports/cypress/screenshots/`, which Git ignores; video recording is disabled. Test failures, launch errors, and runs with no tests return a nonzero exit code. The configuration is in `cypress.config.js` and the baseline spec is `qa/cypress/e2e/tasktracker.cy.js`.
 
 If a terminal inherited `ELECTRON_RUN_AS_NODE` from an Electron-based editor and Cypress reports `bad option: --smoke-test`, unset that variable before running Cypress. On macOS/Linux, use `env -u ELECTRON_RUN_AS_NODE npm run test:e2e`.
+
+## AI-suggested browser coverage
+
+The [ranked suggestions and generation brief](qa/cypress/test-suggestions.md) document eight AI-authored proposals and why five were selected. Their implementation is in `qa/cypress/e2e/ai-suggestions.cy.js`: account isolation, literal HTML-like titles, invalid-session recovery, retrying a rejected save, and independent actions on duplicate titles. They run automatically with the baseline and require no AI credentials. Only the single failed-save response is stubbed; the remaining requests use the real API.

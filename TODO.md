@@ -8,7 +8,7 @@
 - [x] Step 6: add AI-generated Postman edge-case test script
 - [x] Step 7: wire up Newman to run Postman collections
 - [x] Step 8: add Cypress with baseline E2E tests
-- [ ] Step 9: add AI-generated Cypress test case suggestions + implement top suggestions
+- [x] Step 9: add AI-generated Cypress test case suggestions + implement top suggestions
 - [ ] Step 10: implement AI-assisted self-healing Cypress selectors
 - [ ] Step 11: add Selenium cross-browser smoke tests
 - [ ] Step 12: add visual regression screenshot baseline
