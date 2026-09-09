@@ -1,0 +1,89 @@
+name: QA
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qa-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: 'true'
+  AI_MODE: offline
+  SE_AVOID_STATS: 'true'
+  SE_SKIP_DRIVER_IN_PATH: 'true'
+
+jobs:
+  full-suite:
+    name: Full QA suite
+    # The reviewed visual baseline is darwin-arm64, captured on macOS 15.
+    runs-on: macos-15
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies and Cypress
+        id: install
+        run: |
+          npm ci
+          npx --no-install cypress install
+          mkdir -p qa/reports/ci
+          node -e 'if (process.platform !== "darwin" || process.arch !== "arm64") throw new Error("Visual baselines require macOS ARM64")'
+          node --version
+          sw_vers
+
+      # Explicit status conditions allow every suite to run after earlier failures.
+      # No continue-on-error: every failed test step still fails the job.
+      - name: Unit tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm test 2>&1 | tee qa/reports/ci/unit.log
+
+      - name: Postman collections
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run test:api 2>&1 | tee qa/reports/ci/postman.log
+
+      - name: Cypress browser tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: env -u ELECTRON_RUN_AS_NODE npm run test:e2e 2>&1 | tee qa/reports/ci/cypress.log
+
+      - name: Selenium Chrome and Firefox smoke tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        env:
+          SELENIUM_BROWSERS: chrome,firefox
+        run: npm run test:selenium 2>&1 | tee qa/reports/ci/selenium.log
+
+      - name: Visual comparison and offline semantic summary
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        env:
+          SE_FORCE_BROWSER_DOWNLOAD: 'true'
+        run: npm run test:visual 2>&1 | tee qa/reports/ci/visual.log
+
+      - name: Upload QA evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: qa-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            qa/reports/
+            qa/visual/baseline/
+            qa/visual/current/
+            qa/visual/diffs/
