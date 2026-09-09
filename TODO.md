@@ -14,5 +14,5 @@
 - [x] Step 12: add visual regression screenshot baseline
 - [x] Step 13: add AI-based semantic visual diff review
 - [x] Step 14: add GitHub Actions CI pipeline for full test suite
-- [ ] Step 15: add AI-assisted bug report generation on test failure
-- [ ] Step 16: finalize documentation and project polish
+- [x] Step 15: add AI-assisted bug report generation on test failure
+- [x] Step 16: finalize documentation and project polish
