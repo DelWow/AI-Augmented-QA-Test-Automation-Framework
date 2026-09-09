@@ -1,0 +1,17 @@
+{
+  "environment": "darwin-arm64",
+  "browser": "chrome",
+  "browserVersion": "152.0.7977.83",
+  "viewport": {
+    "width": 1280,
+    "height": 800,
+    "deviceScaleFactor": 1,
+    "mobile": false
+  },
+  "states": [
+    "login",
+    "empty-tasks",
+    "populated-tasks",
+    "validation-error"
+  ]
+}

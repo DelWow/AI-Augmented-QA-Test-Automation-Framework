@@ -45,7 +45,7 @@ BASE_URL=http://127.0.0.1:3000 npm run test:api
 
 The runner reads `BASE_URL` from the process environment, not from `.env`. When set, it uses that server without starting or stopping it. Collections create unique demo users and delete their tasks on successful runs; interrupted runs may leave data in the target server.
 
-Console results and JUnit XML reports are produced for each collection at `qa/reports/postman/baseline.xml` and `qa/reports/postman/ai-edge-cases.xml`. Reports are overwritten on subsequent runs and ignored by Git. Use `npm test` for unit checks, or `npm run test:all` to run unit checks, both full collections, Cypress E2E tests, and Selenium smoke tests.
+Console results and JUnit XML reports are produced for each collection at `qa/reports/postman/baseline.xml` and `qa/reports/postman/ai-edge-cases.xml`. Reports are overwritten on subsequent runs and ignored by Git. Use `npm test` for unit checks, or `npm run test:all` to run unit checks, both full collections, Cypress E2E tests, Selenium smoke tests, and visual regression checks.
 
 ## Baseline browser tests with Cypress
 
@@ -85,3 +85,9 @@ BASE_URL=http://127.0.0.1:3000 SELENIUM_BROWSERS=chrome,firefox npm run test:sel
 Only `chrome` and `firefox` are accepted. `BASE_URL` is read from the exported environment, not `.env`; external servers remain running. Cleanup deletes only the unique user's tasks and quits each browser even after an assertion fails. Interrupted runs may leave tasks on external servers.
 
 The runner attempts every selected browser and returns a nonzero exit code if any workflow, launch, cleanup, or browser shutdown fails. Results, browser versions, durations, and errors are written to `qa/reports/selenium/results.json`, which is ignored by Git. The report is reset for each valid browser selection and updated as browsers finish. The implementation is `qa/selenium/run-smoke.js`.
+
+## Visual regression checks
+
+Run `npm run test:visual` to compare four fixed-viewport Chrome screenshots: login, empty tasks, populated tasks, and a validation error. Baselines and capture metadata are stored under `qa/visual/baseline/`; current images, pixel diffs, and the JSON report are ignored by Git. Any detected pixel mismatch, missing baseline, or environment mismatch fails the run.
+
+The initial baseline set is for macOS ARM64 and records the exact Chrome version. On another platform or after a browser change, create and inspect the appropriate baseline explicitly with `npm run visual:update`. Routine checks never update expected images. See the [visual workflow and review instructions](qa/visual/README.md) before updating baselines.
