@@ -3,18 +3,24 @@
   "version": "1.0.0",
   "private": true,
   "engines": {
-    "node": ">=22"
+    "node": "^22.0.0 || ^24.0.0 || >=26.0.0"
   },
   "scripts": {
     "start": "node --env-file-if-exists=.env app/server.js",
     "test": "node --test qa/unit/*.test.js",
     "test:api": "node qa/postman/run-collections.js",
-    "test:all": "npm test && npm run test:api"
+    "test:all": "npm test && npm run test:api && npm run test:e2e",
+    "test:e2e": "node qa/cypress/run-e2e.js",
+    "test:e2e:open": "node qa/cypress/run-e2e.js --open"
   },
   "dependencies": {
     "express": "^5.2.1"
   },
   "devDependencies": {
+    "cypress": "^16.0.0",
     "newman": "^6.2.2"
+  },
+  "allowScripts": {
+    "cypress@16.0.0": true
   }
 }
