@@ -45,7 +45,7 @@ BASE_URL=http://127.0.0.1:3000 npm run test:api
 
 The runner reads `BASE_URL` from the process environment, not from `.env`. When set, it uses that server without starting or stopping it. Collections create unique demo users and delete their tasks on successful runs; interrupted runs may leave data in the target server.
 
-Console results and JUnit XML reports are produced for each collection at `qa/reports/postman/baseline.xml` and `qa/reports/postman/ai-edge-cases.xml`. Reports are overwritten on subsequent runs and ignored by Git. Use `npm test` for unit checks, or `npm run test:all` to run unit checks, both full collections, and Cypress E2E tests.
+Console results and JUnit XML reports are produced for each collection at `qa/reports/postman/baseline.xml` and `qa/reports/postman/ai-edge-cases.xml`. Reports are overwritten on subsequent runs and ignored by Git. Use `npm test` for unit checks, or `npm run test:all` to run unit checks, both full collections, Cypress E2E tests, and Selenium smoke tests.
 
 ## Baseline browser tests with Cypress
 
@@ -68,3 +68,20 @@ The [ranked suggestions and generation brief](qa/cypress/test-suggestions.md) do
 The login, add-task, and logout lookups use `cy.byIntent(...)`. If a primary selector disappears, an AI-authored rule can recover a unique visible button with the expected scope, type, and exact text. Ambiguous or incorrect matches fail, and normal click/actionability checks still apply. This uses reviewed offline rules, with no runtime AI call.
 
 Recovery details appear in the Cypress Command Log and `qa/reports/cypress/selector-recovery.jsonl`. Six verification tests cover intentional selector changes and rejection conditions. See the [rules, generation brief, and strict-mode usage](qa/cypress/selector-recovery.md) for maintenance guidance.
+
+## Selenium cross-browser smoke tests
+
+Run `npm run test:selenium` after `npm ci`. The runner starts an isolated local API and runs the same smoke workflow sequentially in headless Chrome and Firefox, each with a fresh browser session and unique user. It verifies login, an empty task list, creation, completion persisted through reload, deletion persisted through reload, and logout persisted through reload. DOM conditions use explicit waits; no fixed sleeps or mocked API responses are used.
+
+[Selenium Manager](https://www.selenium.dev/documentation/selenium_manager/) resolves browser drivers and can download missing Chrome/Firefox browsers into its cache. The first run needs network access for uncached binaries; restricted environments should provision compatible browsers and drivers beforehand. Browser launch failures fail the run rather than silently skipping coverage.
+
+To narrow a local run or use an existing server:
+
+```sh
+SELENIUM_BROWSERS=chrome npm run test:selenium
+BASE_URL=http://127.0.0.1:3000 SELENIUM_BROWSERS=chrome,firefox npm run test:selenium
+```
+
+Only `chrome` and `firefox` are accepted. `BASE_URL` is read from the exported environment, not `.env`; external servers remain running. Cleanup deletes only the unique user's tasks and quits each browser even after an assertion fails. Interrupted runs may leave tasks on external servers.
+
+The runner attempts every selected browser and returns a nonzero exit code if any workflow, launch, cleanup, or browser shutdown fails. Results, browser versions, durations, and errors are written to `qa/reports/selenium/results.json`, which is ignored by Git. The report is reset for each valid browser selection and updated as browsers finish. The implementation is `qa/selenium/run-smoke.js`.

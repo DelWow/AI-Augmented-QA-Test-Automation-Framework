@@ -10,7 +10,7 @@
 - [x] Step 8: add Cypress with baseline E2E tests
 - [x] Step 9: add AI-generated Cypress test case suggestions + implement top suggestions
 - [x] Step 10: implement AI-assisted self-healing Cypress selectors
-- [ ] Step 11: add Selenium cross-browser smoke tests
+- [x] Step 11: add Selenium cross-browser smoke tests
 - [ ] Step 12: add visual regression screenshot baseline
 - [ ] Step 13: add AI-based semantic visual diff review
 - [ ] Step 14: add GitHub Actions CI pipeline for full test suite
