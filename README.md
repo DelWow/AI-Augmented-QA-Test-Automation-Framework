@@ -93,3 +93,13 @@ Run `npm run test:visual` to compare four fixed-viewport Chrome screenshots: log
 The initial baseline set is for macOS ARM64 and records the exact Chrome version. On another platform or after a browser change, create and inspect the appropriate baseline explicitly with `npm run visual:update`. Routine checks never update expected images. See the [visual workflow and review instructions](qa/visual/README.md) before updating baselines.
 
 Visual checks also produce an offline semantic-review summary. For actual AI assessment of changed screenshots, configure `AI_MODE=online`, `OPENAI_API_KEY`, and an image-capable `OPENAI_MODEL` in `.env`, then run `npm run visual:review`. The separate command sends the three comparison images to OpenAI and records advisory findings in `qa/reports/visual/semantic-review.json` and `.md`. It verifies image hashes and never overrides pixel failures or updates baselines. See the [semantic-review setup and limitations](qa/visual/README.md#semantic-diff-review).
+
+## GitHub Actions CI
+
+The `QA` workflow in `.github/workflows/qa.yml` runs on pushes, pull requests, and manual dispatch. It installs dependencies with `npm ci` on Node.js 24, then runs unit tests, Postman, Cypress, Selenium in Chrome and Firefox, and visual comparisons with offline semantic summaries. Each suite runs even if an earlier suite fails; failed steps still fail the job. Bash pipefail preserves test failures while saving console logs.
+
+CI uses the [macOS 15 ARM64 runner](https://github.com/actions/runner-images#available-images) to match the reviewed baseline platform. Visual comparison requests the exact Chrome for Testing version recorded in the baseline manifest; Selenium Manager downloads it when needed. Missing baselines and real image mismatches fail CI. Runner OS updates can still affect native fonts and controls: investigate the uploaded evidence rather than regenerating expected images in CI.
+
+Every run attempts to upload `qa-evidence-<run-id>-<attempt>` with suite logs, reports, failure screenshots, current visual images, baselines, and diffs, retained for 14 days. The workflow has read-only repository permissions, no AI secrets, a 30-minute timeout, and cancels older runs for the same ref. Actions are pinned to commit SHAs; npm downloads are cached by the lockfile. CI never updates baselines, commits changes, or requests online AI review.
+
+After you push the workflow, inspect its first hosted run in the repository's Actions tab. Local validation cannot establish the hosted runner's pixel equivalence; any initial difference requires image review. For an intentional browser-baseline update, see the [visual review workflow](qa/visual/README.md).

@@ -1,7 +1,7 @@
 {
   "environment": "darwin-arm64",
   "browser": "chrome",
-  "browserVersion": "152.0.7977.83",
+  "browserVersion": "153.0.8010.36",
   "viewport": {
     "width": 1280,
     "height": 800,

@@ -18,14 +18,14 @@ The runner uses headless Chrome through Selenium, a 1280×800 viewport at device
 - `diffs/<platform>-<architecture>/`: pixel diffs for same-size mismatches, ignored by Git.
 - `../reports/visual/results.json`: capture metadata, per-state results, and errors, ignored by Git.
 
-The initial baselines target macOS on ARM64 (`darwin-arm64`). The manifest records the exact Chrome version, platform/architecture, viewport, and state list. Comparison rejects mismatched metadata to distinguish an environment change from a UI regression. System fonts and native controls can vary by OS release as well; use a consistent OS/browser environment for reliable results.
+The baselines target macOS on ARM64 (`darwin-arm64`). The manifest records the exact Chrome for Testing version, platform/architecture, viewport, and state list. Comparison requests that browser version through Selenium Manager and rejects mismatched metadata. System fonts and native controls can vary by OS release as well; use a consistent OS/browser environment for reliable results. CI uses macOS 15 ARM64 and never regenerates baselines.
 
 Pixelmatch uses a per-pixel color threshold of 0.1 and ignores detected anti-aliasing differences. Any remaining changed pixel fails the check; there is no allowed percentage of changed pixels. Dimension mismatches and missing baselines also fail. Same-size image differences produce a PNG diff; dimension and environment mismatches are explained in the JSON report. Comparison never writes baseline files.
 
 ## Intentionally update baselines
 
 1. Inspect the current images, diffs, and intended UI or environment change.
-2. Run `npm run visual:update` to capture all four states and replace the baseline set for the current platform/architecture. A missing platform baseline must also be created explicitly with this command.
+2. Run `npm run visual:update` to capture all four states and replace the baseline set for the current platform/architecture. A missing platform baseline must also be created explicitly with this command. For a reproducible CI browser update, select a downloadable [Chrome for Testing version](https://googlechromelabs.github.io/chrome-for-testing/) explicitly: `VISUAL_CHROME_VERSION=153.0.8010.36 npm run visual:update`. This variable affects update mode only; comparison always uses the manifest version. Avoid recording an installed Chrome build that cannot be provisioned on a clean runner.
 3. Inspect all four baseline PNGs and their manifest, then run `npm run test:visual` again to check reproducibility.
 4. Include the reviewed PNGs and manifest with the intended change when you choose to commit.
 

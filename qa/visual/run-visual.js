@@ -51,9 +51,12 @@ async function main() {
       await once(server, 'listening');
       baseUrl = `http://127.0.0.1:${server.address().port}`;
     }
-    driver = await new Builder().forBrowser('chrome').setChromeOptions(
-      new chrome.Options().addArguments('--headless=new', '--force-color-profile=srgb', '--lang=en-US')
-    ).build();
+    const chromeOptions = new chrome.Options().addArguments('--headless=new', '--force-color-profile=srgb', '--lang=en-US');
+    // Hosted runners update Chrome independently of our reviewed baselines.
+    // Selenium Manager resolves the recorded version for comparison runs.
+    if (expected) chromeOptions.setBrowserVersion(expected.browserVersion);
+    else if (process.env.VISUAL_CHROME_VERSION) chromeOptions.setBrowserVersion(process.env.VISUAL_CHROME_VERSION);
+    driver = await new Builder().forBrowser('chrome').setChromeOptions(chromeOptions).build();
     await driver.manage().setTimeouts({ implicit: 0, pageLoad: 30000, script: 10000 });
     await driver.sendDevToolsCommand('Emulation.setDeviceMetricsOverride', viewport);
     await driver.sendDevToolsCommand('Emulation.setEmulatedMedia', {
