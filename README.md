@@ -4,7 +4,7 @@ TaskTracker is a small application used to demonstrate API, browser, cross-brows
 
 ## Baseline API checks with Postman
 
-1. Install Node.js 22 or newer, then run `npm ci` and `npm start`.
+1. Install Node.js 22, 24, or 26+ (supported by Cypress 16), then run `npm ci` and `npm start`.
 2. Import `qa/postman/baseline.postman_collection.json` into Postman.
 3. The collection's `baseUrl` defaults to `http://127.0.0.1:3000`. Change it if the server uses a different port; omit the trailing slash. No Postman environment is required.
 4. Run the entire collection in order using Collection Runner. Keep all requests selected so login, task creation, and cleanup run together.
@@ -45,4 +45,26 @@ BASE_URL=http://127.0.0.1:3000 npm run test:api
 
 The runner reads `BASE_URL` from the process environment, not from `.env`. When set, it uses that server without starting or stopping it. Collections create unique demo users and delete their tasks on successful runs; interrupted runs may leave data in the target server.
 
-Console results and JUnit XML reports are produced for each collection at `qa/reports/postman/baseline.xml` and `qa/reports/postman/ai-edge-cases.xml`. Reports are overwritten on subsequent runs and ignored by Git. Use `npm test` for unit checks, or `npm run test:all` to run unit checks followed by both full collections.
+Console results and JUnit XML reports are produced for each collection at `qa/reports/postman/baseline.xml` and `qa/reports/postman/ai-edge-cases.xml`. Reports are overwritten on subsequent runs and ignored by Git. Use `npm test` for unit checks, or `npm run test:all` to run unit checks, both full collections, and Cypress E2E tests.
+
+## Baseline browser tests with Cypress
+
+After `npm ci`, run `npm run test:e2e`. The runner starts an isolated TaskTracker server on an available localhost port, runs the baseline, AI-suggested, and selector-recovery specs in headless Electron, and shuts down the server. Cypress downloads its browser binary during installation; if install scripts were disabled, run `npx cypress install` first.
+
+The tests cover login failure and recovery, task creation/completion/reopening/deletion with reload persistence, logout persistence, and title validation with recovery. They exercise the real frontend and API, wait for network responses instead of fixed delays, and use a unique user per test. An after-test cleanup removes that user's tasks, including when a UI assertion fails; interrupted runs may still leave data on an external server.
+
+Use `npm run test:e2e:open` for the interactive Cypress runner and close it when finished to stop the temporary server. To target an existing server, run `BASE_URL=http://127.0.0.1:3000 npm run test:e2e` (or `test:e2e:open`). As with Newman, the runner reads the exported variable, not `.env`, and leaves external servers running.
+
+Results appear in the terminal. Failed headless tests save screenshots under `qa/reports/cypress/screenshots/`, which Git ignores; video recording is disabled. Test failures, launch errors, and runs with no tests return a nonzero exit code. The configuration is in `cypress.config.js` and the baseline spec is `qa/cypress/e2e/tasktracker.cy.js`.
+
+If a terminal inherited `ELECTRON_RUN_AS_NODE` from an Electron-based editor and Cypress reports `bad option: --smoke-test`, unset that variable before running Cypress. On macOS/Linux, use `env -u ELECTRON_RUN_AS_NODE npm run test:e2e`.
+
+## AI-suggested browser coverage
+
+The [ranked suggestions and generation brief](qa/cypress/test-suggestions.md) document eight AI-authored proposals and why five were selected. Their implementation is in `qa/cypress/e2e/ai-suggestions.cy.js`: account isolation, literal HTML-like titles, invalid-session recovery, retrying a rejected save, and independent actions on duplicate titles. They run automatically with the baseline and require no AI credentials. Only the single failed-save response is stubbed; the remaining requests use the real API.
+
+## AI-assisted selector recovery
+
+The login, add-task, and logout lookups use `cy.byIntent(...)`. If a primary selector disappears, an AI-authored rule can recover a unique visible button with the expected scope, type, and exact text. Ambiguous or incorrect matches fail, and normal click/actionability checks still apply. This uses reviewed offline rules, with no runtime AI call.
+
+Recovery details appear in the Cypress Command Log and `qa/reports/cypress/selector-recovery.jsonl`. Six verification tests cover intentional selector changes and rejection conditions. See the [rules, generation brief, and strict-mode usage](qa/cypress/selector-recovery.md) for maintenance guidance.
