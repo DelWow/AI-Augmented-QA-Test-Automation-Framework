@@ -1,6 +1,6 @@
 # AI-Augmented QA Test Automation Framework
 
-TaskTracker is a small application used to demonstrate API, browser, cross-browser, and visual testing with optional Claude-assisted test generation, selector recovery, and failure analysis.
+TaskTracker is a small application used to demonstrate API, browser, cross-browser, and visual testing with optional AI-assisted test generation, selector recovery, and failure analysis.
 
 ## Baseline API checks with Postman
 
@@ -91,3 +91,5 @@ The runner attempts every selected browser and returns a nonzero exit code if an
 Run `npm run test:visual` to compare four fixed-viewport Chrome screenshots: login, empty tasks, populated tasks, and a validation error. Baselines and capture metadata are stored under `qa/visual/baseline/`; current images, pixel diffs, and the JSON report are ignored by Git. Any detected pixel mismatch, missing baseline, or environment mismatch fails the run.
 
 The initial baseline set is for macOS ARM64 and records the exact Chrome version. On another platform or after a browser change, create and inspect the appropriate baseline explicitly with `npm run visual:update`. Routine checks never update expected images. See the [visual workflow and review instructions](qa/visual/README.md) before updating baselines.
+
+Visual checks also produce an offline semantic-review summary. For actual AI assessment of changed screenshots, configure `AI_MODE=online`, `OPENAI_API_KEY`, and an image-capable `OPENAI_MODEL` in `.env`, then run `npm run visual:review`. The separate command sends the three comparison images to OpenAI and records advisory findings in `qa/reports/visual/semantic-review.json` and `.md`. It verifies image hashes and never overrides pixel failures or updates baselines. See the [semantic-review setup and limitations](qa/visual/README.md#semantic-diff-review).

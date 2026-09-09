@@ -14,7 +14,8 @@
     "test:e2e:open": "node qa/cypress/run-e2e.js --open",
     "test:selenium": "node qa/selenium/run-smoke.js",
     "test:visual": "node qa/visual/run-visual.js",
-    "visual:update": "node qa/visual/run-visual.js --update"
+    "visual:update": "node qa/visual/run-visual.js --update",
+    "visual:review": "node --env-file-if-exists=.env qa/visual/review-diffs.js"
   },
   "dependencies": {
     "express": "^5.2.1"

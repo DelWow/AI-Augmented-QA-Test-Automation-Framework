@@ -7,6 +7,7 @@ const { Builder, By, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const { createApp } = require('../../app/server');
 const { compareScreenshot } = require('./compare');
+const { reviewVisualReport } = require('./review-diffs');
 
 const states = ['login', 'empty-tasks', 'populated-tasks', 'validation-error'];
 const environment = `${process.platform}-${process.arch}`;
@@ -148,6 +149,10 @@ async function main() {
     await writeFile(reportFile, JSON.stringify(report, null, 2) + '\n');
     if (report.status === 'failed') process.exitCode = 1;
     console.log(`Visual report: ${reportFile}`);
+    if (!update) {
+      const review = await reviewVisualReport({ reportFile, mode: 'offline' });
+      console.log(`Semantic review: ${review.status} (offline)`);
+    }
   }
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });
