@@ -17,13 +17,13 @@ Start with the [quick start](../README.md#quick-start). Node.js 24 matches CI; `
 
 `npm start`, `visual:review`, and `bugs:review` load `.env` if present. The test runners read **exported process variables**, not `.env`. Exported values take precedence in commands that load the file. Setting `BASE_URL` in `.env` alone does not redirect tests. The `baseUrl` collection variable in Postman is configured separately.
 
-If needed, copy the example only when you do not already have a local configuration:
+To create a local configuration, copy the example (keep your existing `.env` if you have one):
 
 ```sh
 cp .env.example .env
 ```
 
-Edit the file locally; `.env` is ignored by Git. Keep `AI_MODE=offline` for local evidence-only reports. The example model is configurable, and the application does not automatically substitute another model. Automatic test reports remain offline even when online review is configured.
+Edit the file locally; `.env` is ignored by Git. Keep `AI_MODE=offline` for local evidence-only reports. Choose a model available to your account. Automatic test reports remain offline even when online review is configured.
 
 The examples below use a POSIX shell. In PowerShell, set a variable with `$env:BASE_URL = 'http://127.0.0.1:3000'`, run the command, then remove it with `Remove-Item Env:BASE_URL`.
 
@@ -42,11 +42,11 @@ SELENIUM_BROWSERS=firefox npm run test:selenium
 | Cypress binary missing | Run `npx --no-install cypress install`; ensure dependency install scripts were not blocked. |
 | Cypress `bad option: --smoke-test` | Remove an inherited `ELECTRON_RUN_AS_NODE` setting: `env -u ELECTRON_RUN_AS_NODE npm run test:e2e` or `npm run test:all`. |
 | Browser or driver download fails | Check network access and Selenium Manager's cache. Use a downloadable Chrome for Testing build for visual baselines. Browser launch failures are test failures, not skipped coverage. |
-| Missing visual baseline / metadata mismatch | Check OS, architecture, viewport, and the manifest. Follow the [baseline review workflow](../qa/visual/README.md) for intentional changes; never auto-update to hide a failure. |
+| Missing visual baseline / metadata mismatch | Check OS, architecture, viewport, and the manifest. Follow the [baseline review workflow](../qa/visual/README.md) when the change is intentional. |
 | Pixel mismatch on a hosted runner | Download the QA artifact and inspect baseline/current/diff images. Native fonts and controls can differ across OS updates even with the same browser. |
 | Semantic review reports stale evidence | Rerun `test:visual`, then review before overwriting any of its images or reports. |
 | Bug review has no recorded result | Use `npm run test:suite -- <suite>` first. Direct test commands do not create wrapper run records. |
-| Online review is pending or errors | Check `AI_MODE`, credentials, model access, and the generated review error. Offline reports never claim a model assessment. |
+| Online review is pending or errors | Check `AI_MODE`, credentials, model access, and the generated review error. Offline reports leave AI review pending. |
 | A test log contains errors but the suite passed | Negative tests intentionally exercise failures. Use the process exit code and final suite status, not keyword searches in the output. |
 
 Reports and current/diff images are replaced during runs. Save evidence you need before rerunning. Passing suite reruns clear only that suite's stale bug draft. Match run IDs and timestamps when inspecting results left by interrupted runs.

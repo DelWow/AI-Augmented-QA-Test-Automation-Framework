@@ -1,10 +1,8 @@
-# AI-generated Cypress suggestions
+# Cypress test suggestions
 
-Codex authored these suggestions and their implementations for step 9 using the baseline Cypress spec, `app/public/app.js`, `app/public/index.html`, `app/server.js`, and `app/openapi.yaml`. This is a checked-in AI-authored artifact; no external model API was called and no runtime AI service is required.
+These AI-assisted scenarios extend the four baseline browser tests. They were developed from the existing specs, frontend, API implementation, and OpenAPI contract. The tests are checked in and run without a model connection.
 
-## Generation brief
-
-Suggest browser scenarios that add coverage beyond the four baseline workflows. Prioritize user data isolation, safe rendering, authentication recovery, and failures that may lose or duplicate user work. Use the existing application contract to define expected behavior. Rank suggestions by impact and coverage gap, select the top five, and implement them against the real UI and API. Use a narrowly scoped intercept only when a failure cannot be triggered through the demo's public interface. Keep test users isolated, clean up their tasks, use request-based synchronization, and verify persistence after reload where relevant. Do not implement selector self-healing or visual regression in this step.
+The priorities were account isolation, safe rendering, session recovery, and failures that could lose or duplicate work. Five of the eight suggestions are implemented below.
 
 ## Ranked suggestions
 
@@ -25,4 +23,4 @@ The five cases live in `e2e/ai-suggestions.cy.js`, with IDs in their test names 
 
 All cases use unique users and real sessions. Cleanup keeps the tokens for every account used, including after logout or session-storage replacement. AI-04 stubs exactly one response with `cy.intercept`; the retry, persistence checks, and cleanup use the real API. Its result demonstrates recovery from a rejected save, not the ambiguous case where a server accepts a write and the response is lost. AI-02 checks this specific DOM-injection regression and is not a complete security assessment.
 
-Revisit the rankings and assertions when the product behavior changes. The brief supports future AI-assisted review; these files do not automatically generate new tests.
+Revisit the rankings and assertions when the product behavior changes. New scenarios are added manually.

@@ -1,94 +1,79 @@
 # AI-Augmented QA Test Automation Framework
 
-TaskTracker is a small Express API and browser app for demonstrating API, end-to-end, cross-browser, and visual testing. The framework combines baseline tests with AI-authored edge cases, constrained selector recovery, and optional AI review of visual differences and failure evidence.
+A QA project built around TaskTracker, a small Express API and browser app. It covers API testing with Postman/Newman, browser workflows with Cypress, Chrome and Firefox smoke tests with Selenium, and screenshot comparison with Pixelmatch.
 
-Routine tests run without an AI key. AI output is advisory: it never changes test verdicts, approves baselines, or publishes issues.
+AI-assisted additions include edge-case tests, selector recovery rules, and optional reviews of visual differences and test failures. The test suite runs without an API key.
+
+![TaskTracker with active and completed tasks](qa/visual/baseline/darwin-arm64/populated-tasks.png)
 
 ## Quick start
 
-Use Node.js 24 to match CI; the package also accepts Node.js 22 and 26+. From the repository root:
+Use Node.js 24 to match CI, then run:
 
 ```sh
 npm ci
 npm start
 ```
 
-Open **http://127.0.0.1:3000**. Log in with any nonempty username and `demo-password`. You can create, complete, reopen, and delete tasks. Stop the server with Ctrl+C. No `.env` file is required for the demo or ordinary tests.
+Open **http://127.0.0.1:3000** and log in with any nonempty username and `demo-password`. You can add, complete, reopen, and delete tasks.
 
-This is an in-memory demo: restarting clears all tasks and sessions. The shared demo password is not production authentication. A username identifies the same task owner across logins; duplicate task titles are allowed.
-
-![TaskTracker with active and completed tasks](qa/visual/baseline/darwin-arm64/populated-tasks.png)
+The app stores tasks and sessions in memory, so restarting the server clears them. The shared password is for the demo; logging in with the same username gives access to that user's tasks.
 
 ## Run tests
-
-In another terminal, run:
 
 ```sh
 npm run test:all
 ```
 
-Each browser/API suite starts its own temporary localhost server by default. The full runner attempts every suite, records a shared run ID, creates drafts for failures, and exits nonzero if any suite fails. A separately running `npm start` instance is not required.
+The runners start their own local servers. Every suite is attempted, and any failure makes the command fail. Reports and failure drafts are written to `qa/reports/`.
 
-The first install/run may download Cypress, browser drivers, or browsers. The checked-in visual baseline targets **macOS 15 ARM64** with its recorded Chrome for Testing version. Other platforms can run the other suites, but the full suite requires an explicitly captured and reviewed visual baseline for their platform. See the [visual baseline workflow](qa/visual/README.md).
+The first run may download browser binaries and drivers. Visual baselines are checked in for **macOS 15 ARM64**; other platforms need their own reviewed baseline to run the visual suite. See the [visual testing guide](qa/visual/README.md).
 
-| Command | Purpose |
+| Command | Runs |
 | --- | --- |
-| `npm test` | Node unit and runner checks |
-| `npm run test:api` | Both Postman collections through Newman |
-| `npm run test:e2e` | Baseline, AI-suggested, and selector-recovery Cypress specs |
-| `npm run test:e2e:open` | Interactive Cypress runner with a temporary server |
-| `npm run test:selenium` | Headless Chrome and Firefox smoke workflows |
-| `npm run test:visual` | Screenshot comparison and offline semantic summary |
-| `npm run test:all` | Every suite, with evidence capture and failure drafts |
-| `npm run test:suite -- postman` | One suite with evidence capture; accepts `unit`, `postman`, `cypress`, `selenium`, or `visual` |
-| `npm run visual:update` | Explicitly replace the current platform's visual baseline; inspect the images before committing |
-| `npm run visual:review` | Review the latest visual evidence; offline unless configured for online mode |
-| `npm run bugs:review -- postman` | Review the selected suite's latest recorded failure |
+| `npm test` | Node tests for the API and QA tooling |
+| `npm run test:api` | Baseline and edge-case Postman collections |
+| `npm run test:e2e` | Cypress browser tests and selector-recovery checks |
+| `npm run test:e2e:open` | Cypress in interactive mode |
+| `npm run test:selenium` | Chrome and Firefox smoke tests |
+| `npm run test:visual` | Screenshot comparison |
+| `npm run test:suite -- postman` | One suite with failure reporting; also accepts `unit`, `cypress`, `selenium`, and `visual` |
+| `npm run visual:update` | Replace the current platform's visual baselines |
+| `npm run visual:review` | Review the latest screenshot differences |
+| `npm run bugs:review -- postman` | Review a recorded suite failure |
 
-Direct commands such as `test:api` do not create suite-level bug drafts; use `test:suite` or `test:all` for that. See the [testing guide](docs/testing.md) for coverage, Postman import instructions, external servers, and CI behavior.
+## AI features
 
-## Where AI fits
+The Postman edge cases and five additional Cypress scenarios were authored with AI and checked into the repository. Selector recovery also uses checked-in rules: it can find a button after its primary selector changes, provided the scope, type, and exact text still match. These features work offline.
 
-| Feature | What runs |
-| --- | --- |
-| Postman edge cases | Checked-in AI-authored cases, rebuilt by an offline script |
-| Cypress suggestions | Ranked AI-authored proposals with five implemented cases |
-| Selector recovery | Offline rules for three button intents; ambiguous or incorrect matches fail |
-| Visual semantic review | Optional OpenAI image assessment of hash-verified comparison evidence |
-| Bug triage | Optional OpenAI text assessment of redacted failure evidence |
+The two review commands can call the OpenAI Responses API to assess screenshots or redacted failure logs. They default to offline mode. To enable them, configure `.env` using [.env.example](.env.example) and the [configuration guide](docs/configuration.md). Reviews leave test results and visual baselines unchanged. Provider integration is tested with mocked responses.
 
-Automatic tests and CI stay offline. To request online review, configure a local `.env` using [.env.example](.env.example), then invoke the relevant review command. Online provider behavior is tested with mocks; live calls require model access and credentials. See [configuration](docs/configuration.md) and the [review limitations](qa/visual/README.md#semantic-diff-review).
-
-## Project map
+## Repository layout
 
 ```text
 app/                     Express API, OpenAPI contract, and browser UI
-qa/unit/                 API, runner, comparator, and review tests
-qa/postman/              Baseline and AI edge-case collections
-qa/cypress/              Browser specs, intent rules, and generation briefs
-qa/selenium/             Chrome/Firefox smoke runner
-qa/visual/               Tracked baselines, capture/comparison, semantic review
-qa/bugs/                 Failure drafts and optional AI triage
-qa/reports/              Generated evidence; ignored by Git
-.github/workflows/qa.yml Full-suite CI workflow
+qa/unit/                 Tests for the API and QA tooling
+qa/postman/              Collections and edge-case generator
+qa/cypress/              Browser specs and selector rules
+qa/selenium/             Cross-browser smoke runner
+qa/visual/               Baselines, screenshot comparison, and review
+qa/bugs/                 Failure reporting and triage
+qa/reports/              Generated reports (ignored by Git)
+.github/workflows/qa.yml GitHub Actions workflow
 ```
 
-The API contract is [app/openapi.yaml](app/openapi.yaml) (JSON syntax, valid YAML). The UI and API are served by the same process. Tests use fresh demo identities to avoid changing other users' data; interrupted external-server runs may leave test tasks behind.
+The [API contract](app/openapi.yaml) describes authentication and task endpoints. The same server serves the API and frontend.
 
-## Results and CI
-
-Reports live under `qa/reports/`: Postman JUnit XML, Selenium JSON, Cypress failure screenshots and recovery logs, visual comparison/semantic-review reports, suite run records, and failure drafts. Current visual images and diffs live under `qa/visual/current/` and `qa/visual/diffs/`. These are generated files; baseline PNGs and manifests are tracked.
-
-The `QA` GitHub Actions workflow runs on pushes, pull requests, and manual dispatch with Node.js 24 on macOS 15 ARM64. Every test stage runs after earlier test failures, and failures still fail the job. Reports and image evidence are uploaded for 14 days. No additional AI secrets are required. Inspect the first hosted run after pushing; local success alone does not establish hosted pixel equivalence.
+GitHub Actions runs all suites on Node.js 24 and macOS 15 ARM64 for pushes, pull requests, and manual runs. Reports and screenshots are retained for 14 days. The workflow needs no AI secrets.
 
 ## Documentation
 
-- [Testing guide](docs/testing.md)
+- [Testing and CI](docs/testing.md)
 - [Configuration and troubleshooting](docs/configuration.md)
-- [Contributing and maintaining baselines](CONTRIBUTING.md)
-- [Postman generation brief](qa/postman/edge-cases.prompt.md)
+- [Contributing](CONTRIBUTING.md)
+- [Postman edge-case brief](qa/postman/edge-cases.prompt.md)
 - [Cypress test suggestions](qa/cypress/test-suggestions.md)
-- [Selector-recovery rules](qa/cypress/selector-recovery.md)
-- [Visual baseline and semantic-review workflow](qa/visual/README.md)
-- [Failure-report workflow](qa/bugs/README.md)
-- [Completed implementation checklist](TODO.md)
+- [Selector recovery](qa/cypress/selector-recovery.md)
+- [Visual testing and review](qa/visual/README.md)
+- [Failure reports](qa/bugs/README.md)
+- [Implementation checklist](TODO.md)

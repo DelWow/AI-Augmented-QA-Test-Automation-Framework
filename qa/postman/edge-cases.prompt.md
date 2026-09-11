@@ -1,6 +1,6 @@
 # AI edge-case generation brief
 
-These cases and their Postman assertion scripts were authored by Codex for step 6 using `app/openapi.yaml`, `app/server.js`, and the baseline collection as context. The brief below records the intended scope for future regeneration. No external model API was called, and the local build script does not invoke a model or read API credentials.
+The edge-case collection was authored with AI assistance using `app/openapi.yaml`, `app/server.js`, and the baseline collection. This brief records the coverage requested. The build script runs offline and serializes the cases defined in its source.
 
 ## Prompt
 
@@ -8,7 +8,7 @@ Extend the TaskTracker baseline coverage with a separate Postman v2.1 edge-case 
 
 Cover username and title boundaries, whitespace normalization, invalid field types, unknown fields, duplicate titles, omitted versus explicit completion values, invalid IDs, malformed and oversized JSON, and ownership isolation for listing, reading, updating, and deleting. Check that rejected writes preserve stored data. Verify missing-task behavior after deletion.
 
-Use `baseUrl`, unique users per iteration, run-local session tokens and captured task IDs. Assert status codes and meaningful response contents, clean up created tasks, and avoid dependence on global ID values or existing user data. Produce a readable JavaScript source script that builds the importable collection deterministically without network access. Keep live AI integration and Newman project wiring outside this step.
+Use `baseUrl`, unique users per iteration, run-local session tokens and captured task IDs. Assert status codes and meaningful response contents, clean up created tasks, and avoid dependence on global ID values or existing user data. Produce a readable JavaScript source script that builds the importable collection deterministically without network access.
 
 ## Review and maintenance
 
